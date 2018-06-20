@@ -3,14 +3,18 @@ const ApiBuilder = require('claudia-api-builder');
 
 const api = new ApiBuilder();
 
-api.registerAuthorizer('chachara-auth', {
-  providerARNs: [process.env.COGNITO_POOL_ARN],
-});
+const { NODE_ENV, COGNITO_POOL_ARN } = process.env;
+
+const config = {
+  providerARNs: NODE_ENV !== 'test' ? COGNITO_POOL_ARN : undefined,
+};
+
+api.registerAuthorizer('chachara-auth', config);
 
 api.get(
   '/',
   () => {
-    return 'Fooooooooo!';
+    return 'Fooo!';
   },
   { cognitoAuthorizer: 'chachara-auth' }
 );
