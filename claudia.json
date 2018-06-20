@@ -1,0 +1,11 @@
+{
+  "lambda": {
+    "role": "chachara-api-executor",
+    "name": "chachara-api",
+    "region": "eu-west-1"
+  },
+  "api": {
+    "id": "e086imwdd1",
+    "module": "index"
+  }
+}
