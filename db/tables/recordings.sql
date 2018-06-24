@@ -1,0 +1,7 @@
+CREATE TABLE recordings (
+  id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
+  s3_key VARCHAR(200) NOT NULL,
+  created_at TIMESTAMP NOT NULL,
+  user_id VARCHAR(50) NOT NULL,
+  question_id INT NOT NULL
+);
