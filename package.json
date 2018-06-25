@@ -12,7 +12,8 @@
   "license": "ISC",
   "dependencies": {
     "claudia-api-builder": "^4.1.0",
-    "dotenv": "^6.0.0"
+    "dotenv": "^6.0.0",
+    "mysql": "^2.15.0"
   },
   "devDependencies": {
     "eslint": "^4.19.1",
