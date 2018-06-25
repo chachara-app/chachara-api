@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "lint": "eslint ./index.js",
-    "seed": "bin/seed.sh"
+    "lint": "eslint ./",
+    "seed": "bin/seed.sh",
+    "deploy": "claudia update"
   },
   "keywords": [],
   "author": "Mauro Gestoso <maurogestoso@gmail.com>",
@@ -18,7 +19,6 @@
   },
   "devDependencies": {
     "eslint": "^4.19.1",
-    "eslint-plugin-prettier": "^2.6.0",
     "jest": "^23.1.0",
     "sinon": "^6.0.0"
   }

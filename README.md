@@ -16,6 +16,10 @@ Seed your development database:
 
 This command assumes you have a username 'root' with no password set.
 
+### Deployment
+
+    $ npm run deploy
+
 ### Testing
 
 Ensure your local MySQL server is running and run the tests:

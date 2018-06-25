@@ -9,7 +9,6 @@
     "indent": ["error", 2],
     "linebreak-style": ["error", "unix"],
     "semi": ["error", "always"],
-    "comma-dangle": ["error", "only-multiline"],
-    "prettier/prettier": "error"
+    "comma-dangle": ["error", "only-multiline"]
   }
 }
