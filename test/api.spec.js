@@ -28,3 +28,7 @@ describe('api', () => {
     });
   });
 });
+
+describe('GET /language/:language/questions', () => {
+  it('responds with 200 and an array of questions in the specified language', done => {});
+});
