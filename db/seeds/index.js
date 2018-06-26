@@ -6,8 +6,6 @@ exports.dropDb = function () {
 };
 
 exports.seedDb = function (questions) {
-  const questionDocs = questions.map(text => {
-    return new Question({ text, language: 'es' });
-  });
+  const questionDocs = questions.map(data => new Question(data));
   return Question.insertMany(questionDocs);
 };

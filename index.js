@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 require('dotenv').config();
+if (!process.env.NODE_ENV) process.env.NODE_ENV = 'development';
 const ApiBuilder = require('claudia-api-builder');
 const mongoose = require('mongoose');
 const {Question} = require('./db/models');
@@ -9,13 +10,16 @@ const api = new ApiBuilder();
 const { NODE_ENV, COGNITO_POOL_ARN } = process.env;
 
 const config = {
-  providerARNs: NODE_ENV !== 'test' ? [COGNITO_POOL_ARN] : undefined,
+  providerARNs: [COGNITO_POOL_ARN],
 };
 
 api.registerAuthorizer('chachara-auth', config);
 
 const DB_URI = process.env[`${NODE_ENV}_DB_URI`];
-mongoose.connect(DB_URI);
+
+mongoose.connect(DB_URI)
+  .then(() => console.log('Successfully connected to MongoDB'))
+  .catch(console.log);
 
 api.get('/', () => {
   return 'Fooo!';
@@ -29,6 +33,9 @@ api.get('/languages/{language}/questions', (request) => {
       return new ApiBuilder.ApiResponse({ questions }, {
         'Content-Types': 'application/json'
       });
+    })
+    .catch(err => {
+      return new ApiBuilder.ApiResponse({ message: err }, 500);
     });
 });
 

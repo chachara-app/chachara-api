@@ -6,7 +6,9 @@
   "scripts": {
     "test": "jest",
     "lint": "eslint ./",
-    "deploy": "claudia update"
+    "deploy": "claudia update",
+    "seed:prod": "NODE_ENV=production node db/seeds/seed.script.js",
+    "seed:test": "NODE_ENV=test node db/seeds/seed.script.js"
   },
   "keywords": [],
   "author": "Mauro Gestoso <maurogestoso@gmail.com>",
