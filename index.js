@@ -1,7 +1,8 @@
 /* eslint-disable no-console */
 require('dotenv').config();
-const dbi = require('./db/dbi');
 const ApiBuilder = require('claudia-api-builder');
+const mongoose = require('mongoose');
+const {Question} = require('./db/models');
 
 const api = new ApiBuilder();
 
@@ -13,21 +14,21 @@ const config = {
 
 api.registerAuthorizer('chachara-auth', config);
 
+const DB_URI = process.env[`${NODE_ENV}_DB_URI`];
+mongoose.connect(DB_URI);
+
 api.get('/', () => {
   return 'Fooo!';
 }, { cognitoAuthorizer: 'chachara-auth' });
 
-api.get('/languages/{id}/questions', (request) => {
-  const id = request.pathParams.id;
-  return dbi.query(`SELECT * FROM questions WHERE language_id=?;`, [id])
-    .then(res => {
-      dbi.closeConnection();
-      return new ApiBuilder.ApiResponse({questions: res}, {'Content-Type': 'application/json'});
-    })
-    .catch((err) => {
-      dbi.closeConnection();
-      console.log(err);
-      return new ApiBuilder.ApiResponse({message: 'Something went wrong'}, 500);
+api.get('/languages/{language}/questions', (request) => {
+  const { language } = request.pathParams;
+
+  return Question.find({ language })
+    .then(questions => {
+      return new ApiBuilder.ApiResponse({ questions }, {
+        'Content-Types': 'application/json'
+      });
     });
 });
 

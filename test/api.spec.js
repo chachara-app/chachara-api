@@ -1,5 +1,9 @@
 const sinon = require('sinon');
 const api = require('../index');
+const mongoose = require('mongoose');
+const { dropDb, seedDb } = require('../db/seeds');
+
+const questions = require('./data/questions.json');
 
 describe('api', () => {
   let lambdaContextSpy;
@@ -7,7 +11,11 @@ describe('api', () => {
     lambdaContextSpy = {
       done: sinon.spy()
     };
+
+    return dropDb().then(() => seedDb(questions));
   });
+
+  afterAll(() => mongoose.disconnect());
 
   describe('GET /', () => {
     it("responds with 200 and a message of 'Fooo!'", done => {
@@ -27,19 +35,25 @@ describe('api', () => {
     it('responds with 200 and an array of questions in the specified language', done => {
       api.proxyRouter({
         requestContext: {
-          resourcePath: '/languages/{id}/questions',
+          resourcePath: '/languages/{language}/questions',
           httpMethod: 'GET',
         },
         pathParameters: {
-          id: 1
+          language: 'es'
         },
       }, lambdaContextSpy).then(() => {
-        const response = lambdaContextSpy.done.firstCall.args;
-        expect(response[0]).toBe(null);
-        expect(response[1].statusCode).toBe(200);
-        const data = JSON.parse(response[1].body);
+        const [err, res] = lambdaContextSpy.done.firstCall.args;
+
+        if (err) {
+          throw err;
+        }
+
+        expect(res.statusCode).toBe(200);
+        const data = JSON.parse(res.body);
         expect(data.questions.length).toBe(5);
-        expect(data.questions[0]).toHaveProperty('question');
+        expect(data.questions[0]).toHaveProperty('text');
+        expect(data.questions[0]).toHaveProperty('language');
+        expect(data.questions[0]).toHaveProperty('_id');
       }).then(done, done);
     });
   });
