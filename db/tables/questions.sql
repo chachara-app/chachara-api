@@ -1,5 +1,0 @@
-CREATE TABLE questions (
-  id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
-  question VARCHAR(200) NOT NULL,
-  language_id INT NOT NULL
-);

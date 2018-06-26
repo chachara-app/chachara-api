@@ -6,7 +6,6 @@
   "scripts": {
     "test": "jest",
     "lint": "eslint ./",
-    "seed": "bin/seed.sh",
     "deploy": "claudia update"
   },
   "keywords": [],
@@ -15,7 +14,7 @@
   "dependencies": {
     "claudia-api-builder": "^4.1.0",
     "dotenv": "^6.0.0",
-    "mysql": "^2.15.0"
+    "mongoose": "^5.1.6"
   },
   "devDependencies": {
     "eslint": "^4.19.1",
