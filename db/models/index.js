@@ -1,3 +1,5 @@
 module.exports = {
-  Question: require('./question')
+  Question: require('./question'),
+  Recording: require('./recording'),
+  User: require('./user')
 };
