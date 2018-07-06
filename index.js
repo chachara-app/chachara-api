@@ -51,7 +51,18 @@ api.post('/users/{userId}/recordings', (request) => {
       if (!user) return Promise.reject({
         response: badRequest(`user ${request.pathParams.userId} does not exist`)
       });
-      else return new Recording({
+      return Question.findById(request.body.questionId)
+        .catch(() => {
+          return Promise.reject({
+            response: badRequest(`question with ID ${request.body.questionId} does not exist`)
+          });
+        });
+    })
+    .then((question) => {
+      if (question === null) return Promise.reject({
+        response: badRequest(`question with ID ${request.body.questionId} does not exist`)
+      });
+      return new Recording({
         user_id: request.pathParams.userId,
         language: request.body.language,
         url: request.body.url,

@@ -8,12 +8,18 @@ const users = require('./data/users.json');
 
 describe('api', () => {
   let lambdaContextSpy;
+  let seededData;
   beforeEach(() => {
     lambdaContextSpy = {
       done: sinon.spy()
     };
 
-    return dropDb().then(() => seedDb(questions, users));
+    return dropDb().then(() => seedDb(questions, users)).then(data => {
+      seededData = {
+        questions: data[0],
+        user: data[1]
+      };
+    });
   });
 
   afterAll(() => mongoose.disconnect());
@@ -47,7 +53,7 @@ describe('api', () => {
           language: 'es',
           url: 'http://www.foo.com',
           lengthMillis: 100,
-          questionId: 1234
+          questionId: seededData.questions[0]._id.toString()
         }
       }, lambdaContextSpy).then(() => {
         const [err, res] = lambdaContextSpy.done.firstCall.args;
@@ -74,7 +80,7 @@ describe('api', () => {
         body: {
           language: 'es',
           lengthMillis: 100,
-          questionId: 1234
+          questionId: seededData.questions[0]._id.toString()
         }
       }, lambdaContextSpy).then(() => {
         const [err, res] = lambdaContextSpy.done.firstCall.args;
@@ -100,7 +106,7 @@ describe('api', () => {
         body: {
           language: 'es',
           url: 'www.foo.com',
-          questionId: 1234
+          questionId: seededData.questions[0]._id.toString()
         }
       }, lambdaContextSpy).then(() => {
         const [err, res] = lambdaContextSpy.done.firstCall.args;
@@ -126,7 +132,7 @@ describe('api', () => {
         body: {
           url: 'www.foo.com',
           lengthMillis: 100,
-          questionId: 1234
+          questionId: seededData.questions[0]._id.toString()
         }
       }, lambdaContextSpy).then(() => {
         const [err, res] = lambdaContextSpy.done.firstCall.args;
@@ -179,7 +185,7 @@ describe('api', () => {
           url: 'www.foo.com',
           lengthMillis: 100,
           language: 'es',
-          questionId: '123'
+          questionId: seededData.questions[0]._id.toString()
         }
       }, lambdaContextSpy).then(() => {
         const [err, res] = lambdaContextSpy.done.firstCall.args;
@@ -191,6 +197,60 @@ describe('api', () => {
         const data = JSON.parse(res.body);
         expect(res.statusCode).toBe(400);
         expect(data.message).toBe('user nonexistant does not exist');
+      }).then(done, done);
+    });
+    it('responds with 400 if questionId does not exist', done => {
+      api.proxyRouter({
+        requestContext: {
+          resourcePath: '/users/{userId}/recordings',
+          httpMethod: 'POST'
+        },
+        pathParameters: {
+          userId: '123'
+        },
+        body: {
+          language: 'es',
+          lengthMillis: 100,
+          url: 'foo.com',
+          questionId: '5b3dc343dcf178e1440db472'
+        }
+      }, lambdaContextSpy).then(() => {
+        const [err, res] = lambdaContextSpy.done.firstCall.args;
+        
+        if (err) {
+          throw err;
+        }
+        
+        const data = JSON.parse(res.body);
+        expect(res.statusCode).toBe(400);
+        expect(data.message).toBe('question with ID 5b3dc343dcf178e1440db472 does not exist');
+      }).then(done, done);
+    });
+    it('responds with 400 if questionId is invalid', done => {
+      api.proxyRouter({
+        requestContext: {
+          resourcePath: '/users/{userId}/recordings',
+          httpMethod: 'POST'
+        },
+        pathParameters: {
+          userId: '123'
+        },
+        body: {
+          language: 'es',
+          lengthMillis: 100,
+          url: 'foo.com',
+          questionId: 'fooo'
+        }
+      }, lambdaContextSpy).then(() => {
+        const [err, res] = lambdaContextSpy.done.firstCall.args;
+        
+        if (err) {
+          throw err;
+        }
+        
+        const data = JSON.parse(res.body);
+        expect(res.statusCode).toBe(400);
+        expect(data.message).toBe('question with ID fooo does not exist');
       }).then(done, done);
     });
   });

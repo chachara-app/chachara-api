@@ -22,7 +22,7 @@ const schema = new mongoose.Schema({
     required: true
   },
   question_id: {
-    type: Number,
+    type: mongoose.SchemaTypes.ObjectId,
     required: true
   }
 });
