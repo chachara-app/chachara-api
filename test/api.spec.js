@@ -5,6 +5,7 @@ const { dropDb, seedDb } = require('../db/seeds');
 
 const questions = require('./data/questions.json');
 const users = require('./data/users.json');
+const recordings = require('./data/recordings.json');
 
 describe('api', () => {
   let lambdaContextSpy;
@@ -14,10 +15,11 @@ describe('api', () => {
       done: sinon.spy()
     };
 
-    return dropDb().then(() => seedDb(questions, users)).then(data => {
+    return dropDb().then(() => seedDb(questions, users, recordings)).then(data => {
       seededData = {
         questions: data[0],
-        user: data[1]
+        user: data[1],
+        recordings: data[2]
       };
     });
   });
@@ -278,6 +280,52 @@ describe('api', () => {
         expect(data.questions[0]).toHaveProperty('text');
         expect(data.questions[0]).toHaveProperty('language');
         expect(data.questions[0]).toHaveProperty('_id');
+      }).then(done, done);
+    });
+  });
+
+  describe('GET /users/:userId/recordings', () => {
+    it('responds with 404 if the userId is not found', done => {
+      api.proxyRouter({
+        requestContext: {
+          resourcePath: '/users/{userId}/recordings',
+          httpMethod: 'GET'
+        },
+        pathParameters: {
+          userId: 'nonexistant'
+        }
+      }, lambdaContextSpy).then(() => {
+        const [err, res] = lambdaContextSpy.done.firstCall.args;
+        
+        if (err) {
+          throw err;
+        }
+        
+        const data = JSON.parse(res.body);
+        expect(res.statusCode).toBe(404);
+        expect(data.message).toBe('user nonexistant does not exist');
+      }).then(done, done);
+    });
+    it('responds with 200 and the recordings belonging to the user', done => {
+      api.proxyRouter({
+        requestContext: {
+          resourcePath: '/users/{userId}/recordings',
+          httpMethod: 'GET'
+        },
+        pathParameters: {
+          userId: '123'
+        }
+      }, lambdaContextSpy).then(() => {
+        const [err, res] = lambdaContextSpy.done.firstCall.args;
+        
+        if (err) {
+          throw err;
+        }
+        
+        const data = JSON.parse(res.body);
+        expect(res.statusCode).toBe(200);
+        expect(data.recordings.length).toBe(3);
+        expect(data.recordings[0].question_id).toBe(data.recordings[0].question._id);
       }).then(done, done);
     });
   });

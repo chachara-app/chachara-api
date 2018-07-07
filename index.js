@@ -4,7 +4,7 @@ if (!process.env.NODE_ENV) process.env.NODE_ENV = 'development';
 const ApiBuilder = require('claudia-api-builder');
 const mongoose = require('mongoose');
 const { Question, Recording, User } = require('./db/models');
-const { badRequest } = require('./lib/response_helpers');
+const { badRequest, notFound } = require('./lib/response_helpers');
 
 const api = new ApiBuilder();
 
@@ -37,6 +37,40 @@ api.get('/languages/{language}/questions', (request) => {
     })
     .catch(err => {
       return new ApiBuilder.ApiResponse({ message: err }, 500);
+    });
+});
+
+api.get('/users/{userId}/recordings', (request) => {
+  const { userId } = request.pathParams;
+  return User.findOne({ id: userId })
+    .then(user => {
+      if (!user) return Promise.reject({
+        response: notFound(`user ${userId} does not exist`)
+      });
+
+      return Recording.aggregate([
+        {
+          $lookup: {
+            from: 'questions',
+            localField: 'question_id',
+            foreignField: '_id',
+            as: 'question'
+          }
+        }
+      ]);
+    })
+    .then(recordings => {
+      recordings = recordings.map(r => {
+        r.question = r.question[0];
+        return r;
+      });
+      return new ApiBuilder.ApiResponse({ recordings }, {
+        'Content-Type': 'application/json'
+      });
+    })
+    .catch(err => {
+      if (err.response) return err.response;
+      else return new ApiBuilder.ApiResponse({ message: err }, 500);
     });
 });
 
