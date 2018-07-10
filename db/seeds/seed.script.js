@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const { dropDb, seedDb } = require('./index');
 const questions = require('../data/questions.json');
 const users = require('../data/users.json');
+const recordings = require('../data/recordings.json');
 
 const { NODE_ENV } = process.env;
 const DB_URI = process.env[`${NODE_ENV}_DB_URI`];
@@ -13,7 +14,7 @@ mongoose.connect(DB_URI)
   .then(() => dropDb())
   .then(() => console.log(`Dropped ${NODE_ENV} database`))
   .then(() => {
-    return seedDb(questions, users);
+    return seedDb(questions, users, recordings);
   })
   .then(() => console.log(`Seeded ${NODE_ENV} database`))
   .then(() => mongoose.disconnect());
