@@ -50,6 +50,11 @@ api.get('/users/{userId}/recordings', (request) => {
 
       return Recording.aggregate([
         {
+          $match: {
+            user_id: userId
+          }
+        },
+        {
           $lookup: {
             from: 'questions',
             localField: 'question_id',
