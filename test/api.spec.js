@@ -329,4 +329,98 @@ describe('api', () => {
       }).then(done, done);
     });
   });
+
+  describe('DELETE /users/:userId/recordings/:recordingId', () => {
+    it('responds with 400 if the recording ID is not valid', done => {
+      api.proxyRouter({
+        requestContext: {
+          resourcePath: '/users/{userId}/recordings/{recordingId}',
+          httpMethod: 'DELETE'
+        },
+        pathParameters: {
+          userId: '123',
+          recordingId: 'foo'
+        }
+      }, lambdaContextSpy).then(() => {
+        const [err, res] = lambdaContextSpy.done.firstCall.args;
+        
+        if (err) {
+          throw err;
+        }
+        
+        const data = JSON.parse(res.body);
+        expect(res.statusCode).toBe(400);
+        expect(data.message).toBe('foo is not a valid Recording ID');
+      }).then(done, done);
+    });
+
+    it('responds with 400 if the user cannot be found', done => {
+      api.proxyRouter({
+        requestContext: {
+          resourcePath: '/users/{userId}/recordings/{recordingId}',
+          httpMethod: 'DELETE'
+        },
+        pathParameters: {
+          userId: '456',
+          recordingId: seededData.recordings[0]._id.toString()
+        }
+      }, lambdaContextSpy).then(() => {
+        const [err, res] = lambdaContextSpy.done.firstCall.args;
+        
+        if (err) {
+          throw err;
+        }
+        
+        const data = JSON.parse(res.body);
+        expect(res.statusCode).toBe(400);
+        expect(data.message).toBe(`Recording ${seededData.recordings[0]._id.toString()} belonging to 456 could not be found`);
+      }).then(done, done);
+    });
+
+    it('responds with 400 if the recording cannot be found', done => {
+      api.proxyRouter({
+        requestContext: {
+          resourcePath: '/users/{userId}/recordings/{recordingId}',
+          httpMethod: 'DELETE'
+        },
+        pathParameters: {
+          userId: '123',
+          recordingId: '5b3fd16ae706b120a8da89a2'
+        }
+      }, lambdaContextSpy).then(() => {
+        const [err, res] = lambdaContextSpy.done.firstCall.args;
+        
+        if (err) {
+          throw err;
+        }
+        
+        const data = JSON.parse(res.body);
+        expect(res.statusCode).toBe(400);
+        expect(data.message).toBe('Recording 5b3fd16ae706b120a8da89a2 belonging to 123 could not be found');
+      }).then(done, done);
+    });
+
+    it('responds with 200 if the recording is successfully deleted', done => {
+      api.proxyRouter({
+        requestContext: {
+          resourcePath: '/users/{userId}/recordings/{recordingId}',
+          httpMethod: 'DELETE'
+        },
+        pathParameters: {
+          userId: '123',
+          recordingId: seededData.recordings[0]._id.toString()
+        }
+      }, lambdaContextSpy).then(() => {
+        const [err, res] = lambdaContextSpy.done.firstCall.args;
+        
+        if (err) {
+          throw err;
+        }
+        
+        const data = JSON.parse(res.body);
+        expect(res.statusCode).toBe(200);
+        expect(data.message).toBe('Deleted');
+      }).then(done, done);
+    });
+  });
 });

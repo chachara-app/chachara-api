@@ -116,4 +116,20 @@ api.post('/users/{userId}/recordings', (request) => {
     });
 }, { cognitoAuthorizer: 'chachara-auth' });
 
+api.delete('/users/{userId}/recordings/{recordingId}', (request) => {
+  const {userId, recordingId} = request.pathParams;
+  return Recording.findOneAndRemove({user_id: userId, _id: recordingId})
+    .then(res => {
+      if (!res) return badRequest(`Recording ${recordingId} belonging to ${userId} could not be found`);
+      else return new ApiBuilder.ApiResponse({ message: 'Deleted' }, {
+        'Content-Type': 'application/json'
+      }, 200);
+    })
+    .catch(err => {
+      if (err.name === 'CastError') {
+        return badRequest(`${request.pathParams.recordingId} is not a valid Recording ID`);
+      }
+    });
+}, {cognitoAuthorizer: 'chachara-auth'});
+
 module.exports = api;
