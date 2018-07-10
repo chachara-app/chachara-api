@@ -110,8 +110,27 @@ api.post('/users/{userId}/recordings', (request) => {
         created_at: new Date().getTime()
       }).save();
     })
+    .then(recording => {
+      return Recording.aggregate([
+        {
+          $match: {
+            _id: recording._id
+          }
+        },
+        {
+          $lookup: {
+            from: 'questions',
+            localField: 'question_id',
+            foreignField: '_id',
+            as: 'question'
+          }
+        }
+      ]);
+    })
     .then(res => {
-      return new ApiBuilder.ApiResponse({ recording: res }, {
+      const recording = res[0];
+      recording.question = recording.question[0];
+      return new ApiBuilder.ApiResponse({ recording }, {
         'Content-Type': 'application/json'
       }, 201);
     })
@@ -133,6 +152,10 @@ api.delete('/users/{userId}/recordings/{recordingId}', (request) => {
     .catch(err => {
       if (err.name === 'CastError') {
         return badRequest(`${request.pathParams.recordingId} is not a valid Recording ID`);
+      } else {
+        return new ApiBuilder.ApiResponse({ error: err }, {
+          'Content-Type': 'application/json'
+        }, 500);
       }
     });
 }, {cognitoAuthorizer: 'chachara-auth'});
