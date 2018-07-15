@@ -3,5 +3,11 @@
   { "text": "Describe a tu familia. ¿Tienes hermanos, primos, sobrinos?", "language": "es" },
   { "text": "¿Tienes una mascota? ¿Cómo es?", "language": "es" },
   { "text": "¿Cuál es tu comida preferida?", "language": "es" },
-  { "text": "¿A dónde has ido en tus últimas vacaciones?", "language": "es" }
+  { "text": "¿A dónde has ido en tus últimas vacaciones?", "language": "es" },
+  { "text": "¿Tienes un coche? ¿Cómo es?", "language": "es" },
+  { "text": "¿Qué prefieres, el té o el café? ¿Porqué?", "language": "es" },
+  { "text": "¿Alguna vez has ido a una granja?", "language": "es" },
+  { "text": "¿Crées que el clima está cambiando?", "language": "es" },
+  { "text": "¿Crées que las redes sociales son buenas o malas para los jóvenes?", "language": "es" },
+  { "text": "Tienes un libro favorito?", "language": "es" }
 ]
