@@ -79,6 +79,24 @@ api.get('/users/{userId}/recordings', (request) => {
     });
 });
 
+api.post('/users', (request) => {
+  if (!request.body.id) return badRequest('id is required');
+  if (!request.body.languages_spoken) return badRequest('languages_spoken is required');
+  if (!request.body.languages_learning) return badRequest('languages_learning is required');
+  if (!request.body.name) return badRequest('name is required');
+
+  const user = new User(request.body);
+  return user.save()
+    .then((doc) => {
+      return new ApiBuilder.ApiResponse({ user: doc }, {
+        'Content-Type': 'application/json'
+      }, 201);
+    })
+    .catch(err => {
+      return new ApiBuilder.ApiResponse({ message: err }, 500);
+    });
+}, { cognitoAuthorizer: 'chachara-auth' });
+
 api.post('/users/{userId}/recordings', (request) => {
   if (!request.body.language) return badRequest('language is required');
   if (!request.body.lengthMillis) return badRequest('lengthMillis is required');

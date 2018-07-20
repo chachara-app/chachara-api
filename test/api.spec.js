@@ -257,6 +257,124 @@ describe('api', () => {
     });
   });
 
+  describe('POST /users', () => {
+    it('responds with 400 if id not provided in post body', done => {
+      api.proxyRouter({
+        requestContext: {
+          resourcePath: '/users',
+          httpMethod: 'POST'
+        },
+        body: {
+          languages_spoken: ['eng'],
+          languages_learning: ['es'],
+          name: 'Harriet'
+        }
+      }, lambdaContextSpy).then(() => {
+        const [err, res] = lambdaContextSpy.done.firstCall.args;
+        if (err) {
+          throw err;
+        }
+
+        let data = JSON.parse(res.body);
+        expect(res.statusCode).toBe(400);
+        expect(data.message).toBe('id is required');
+      }).then(done, done);
+    });
+    it('responds with 400 if name not provided in post body', done => {
+      api.proxyRouter({
+        requestContext: {
+          resourcePath: '/users',
+          httpMethod: 'POST'
+        },
+        body: {
+          languages_spoken: ['eng'],
+          languages_learning: ['es'],
+          id: 'abc123'
+        }
+      }, lambdaContextSpy).then(() => {
+        const [err, res] = lambdaContextSpy.done.firstCall.args;
+        if (err) {
+          throw err;
+        }
+
+        let data = JSON.parse(res.body);
+        expect(res.statusCode).toBe(400);
+        expect(data.message).toBe('name is required');
+      }).then(done, done);
+    });
+    it('responds with 400 if languages_spoken not provided in post body', done => {
+      api.proxyRouter({
+        requestContext: {
+          resourcePath: '/users',
+          httpMethod: 'POST'
+        },
+        body: {
+          languages_learning: ['eng'],
+          id: 'abc123',
+          name: 'Harriet'
+        }
+      }, lambdaContextSpy).then(() => {
+        const [err, res] = lambdaContextSpy.done.firstCall.args;
+        if (err) {
+          throw err;
+        }
+
+        let data = JSON.parse(res.body);
+        expect(res.statusCode).toBe(400);
+        expect(data.message).toBe('languages_spoken is required');
+      }).then(done, done);
+    });
+    it('responds with 400 if languages_learning not provided in post body', done => {
+      api.proxyRouter({
+        requestContext: {
+          resourcePath: '/users',
+          httpMethod: 'POST'
+        },
+        body: {
+          languages_spoken: ['eng'],
+          id: 'abc123',
+          name: 'Harriet'
+        }
+      }, lambdaContextSpy).then(() => {
+        const [err, res] = lambdaContextSpy.done.firstCall.args;
+        if (err) {
+          throw err;
+        }
+
+        let data = JSON.parse(res.body);
+        expect(res.statusCode).toBe(400);
+        expect(data.message).toBe('languages_learning is required');
+      }).then(done, done);
+    });
+
+    it('responds with 201 if the user is successfully created', done => {
+      api.proxyRouter({
+        requestContext: {
+          resourcePath: '/users',
+          httpMethod: 'POST'
+        },
+        body: {
+          languages_spoken: ['eng'],
+          languages_learning: ['es'],
+          id: 'abc123',
+          name: 'Harriet'
+        }
+      }, lambdaContextSpy).then(() => {
+        const [err, res] = lambdaContextSpy.done.firstCall.args;
+        if (err) {
+          throw err;
+        }
+
+        let data = JSON.parse(res.body);
+        expect(res.statusCode).toBe(201);
+        expect(data.user.id).toBe('abc123');
+        expect(data.user.name).toBe('Harriet');
+        expect(data.user.languages_learning).toEqual(['es']);
+        expect(data.user.languages_spoken).toEqual(['eng']);
+      }).then(done, done);
+    });
+  });
+
   describe('GET /language/:languageId/questions', () => {
     it('responds with 200 and an array of questions in the specified language', done => {
       api.proxyRouter({
