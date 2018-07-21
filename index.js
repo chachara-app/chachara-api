@@ -97,6 +97,24 @@ api.post('/users', (request) => {
     });
 }, { cognitoAuthorizer: 'chachara-auth' });
 
+api.get('/users/{userId}', (request) => {
+  const { userId } = request.pathParams;
+  return User.findOne({id: userId})
+    .then(user => {
+      if (!user) return new ApiBuilder.ApiResponse({message: `user ${userId} does not exist`}, {
+        'Content-Type': 'application/json'
+      }, 404);
+      else return new ApiBuilder.ApiResponse({ user }, {
+        'Content-Type': 'application/json'
+      }, 200);
+    })
+    .catch(err => {
+      return new ApiBuilder.ApiResponse({message: err}, {
+        'Content-Type': 'application/json'
+      }, 500);
+    });
+}, { cognitoAuthorizer: 'chachara-auth' });
+
 api.post('/users/{userId}/recordings', (request) => {
   if (!request.body.language) return badRequest('language is required');
   if (!request.body.lengthMillis) return badRequest('lengthMillis is required');

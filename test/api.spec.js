@@ -375,6 +375,46 @@ describe('api', () => {
     });
   });
 
+  describe('GET /users/:userId', () => {
+    it('responds with 200 and the selected user', done => {
+      api.proxyRouter({
+        requestContext: {
+          resourcePath: '/users/{userId}',
+          httpMethod: 'GET'
+        },
+        pathParameters: {
+          userId: '123'
+        }
+      }, lambdaContextSpy).then(() => {
+        const [err, res] = lambdaContextSpy.done.firstCall.args;
+        if (err) throw err;
+
+        const data = JSON.parse(res.body);
+        expect(res.statusCode).toBe(200);
+        expect(data.user.name).toBe('Harriet Test');
+      }).then(done, done);
+    });
+    
+    it('responds with 404 is the selected user is not found', done => {
+      api.proxyRouter({
+        requestContext: {
+          resourcePath: '/users/{userId}',
+          httpMethod: 'GET'
+        },
+        pathParameters: {
+          userId: '456'
+        }
+      }, lambdaContextSpy).then(() => {
+        const [err, res] = lambdaContextSpy.done.firstCall.args;
+        if (err) throw err;
+
+        const data = JSON.parse(res.body);
+        expect(res.statusCode).toBe(404);
+        expect(data.message).toBe('user 456 does not exist');
+      }).then(done, done);
+    });
+  });
+
   describe('GET /language/:languageId/questions', () => {
     it('responds with 200 and an array of questions in the specified language', done => {
       api.proxyRouter({
