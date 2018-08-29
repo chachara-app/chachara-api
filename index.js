@@ -97,6 +97,25 @@ api.post('/users', (request) => {
     });
 }, { cognitoAuthorizer: 'chachara-auth' });
 
+api.put('/users/{userId}', (request) => {
+  const { userId } = request.pathParams;
+  return User.findOneAndUpdate({id: userId}, request.body, {new: true})
+    .then(user => {
+      if (!user) return new ApiBuilder.ApiResponse({message: `user ${userId} does not exist`}, {
+        'Content-Type': 'application/json',
+      }, 404);
+
+      return new ApiBuilder.ApiResponse({ user }, {
+        'Content-Type': 'application/json',
+      });
+    })
+    .catch(err => {
+      return new ApiBuilder.ApiResponse({message: err}, {
+        'Content-Type': 'application/json'
+      }, 500);
+    });
+}, { cognitoAuthorizer: 'chachara-auth' });
+
 api.get('/users/{userId}', (request) => {
   const { userId } = request.pathParams;
   return User.findOne({id: userId})

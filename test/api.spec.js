@@ -41,7 +41,7 @@ describe('api', () => {
     });
   });
 
-  describe('POST /users/:userId/recordings', () => {
+  describe('POST /users/{userId}/recordings', () => {
     it('responds with 201 and the new recording if recording saved successfully', done => {
       api.proxyRouter({
         requestContext: {
@@ -375,7 +375,7 @@ describe('api', () => {
     });
   });
 
-  describe('GET /users/:userId', () => {
+  describe('GET /users/{userId}', () => {
     it('responds with 200 and the selected user', done => {
       api.proxyRouter({
         requestContext: {
@@ -415,7 +415,108 @@ describe('api', () => {
     });
   });
 
-  describe('GET /language/:languageId/questions', () => {
+  describe('PUT /users/{userId}', () => {
+    it('responds with 404 if the selected user is not found', done => {
+      api.proxyRouter({
+        requestContext: {
+          resourcePath: '/users/{userId}',
+          httpMethod: 'PUT'
+        },
+        pathParameters: {
+          userId: '456'
+        },
+        body: {
+          languages_spoken: ['eng'],
+          languages_learning: ['es'],
+          id: 'abc123',
+          name: 'Harriet'
+        }
+      }, lambdaContextSpy).then(() => {
+        const [err, res] = lambdaContextSpy.done.firstCall.args;
+        if (err) throw err;
+
+        const data = JSON.parse(res.body);
+        expect(res.statusCode).toBe(404);
+        expect(data.message).toBe('user 456 does not exist');
+      }).then(done, done);
+    });
+
+    it('ignores invalid properties passed on the body', done => {
+      api.proxyRouter({
+        requestContext: {
+          resourcePath: '/users/{userId}',
+          httpMethod: 'PUT'
+        },
+        pathParameters: {
+          userId: '123'
+        },
+        body: {
+          not_allowed: 'foo',
+          languages_spoken: ['eng'],
+          languages_learning: ['es'],
+          id: 'abc123',
+          name: 'changed'
+        }
+      }, lambdaContextSpy).then(() => {
+        const [err, res] = lambdaContextSpy.done.firstCall.args;
+        if (err) throw err;
+
+        const data = JSON.parse(res.body);
+        expect(res.statusCode).toBe(200);
+        expect(data.user.not_allowed).toBe(undefined);
+        expect(data.user.name).toBe('changed');
+      }).then(done, done);
+    });
+
+    it('returns the original user if body has no properties', done => {
+      api.proxyRouter({
+        requestContext: {
+          resourcePath: '/users/{userId}',
+          httpMethod: 'PUT'
+        },
+        pathParameters: {
+          userId: '123'
+        },
+        body: {}
+      }, lambdaContextSpy).then(() => {
+        const [err, res] = lambdaContextSpy.done.firstCall.args;
+        if (err) throw err;
+
+        const data = JSON.parse(res.body);
+        expect(res.statusCode).toBe(200);
+        expect(data.user.name).toBe('Harriet Test');
+      }).then(done, done);
+    });
+
+    it('returns 200 and the new user object if successful', done => {
+      api.proxyRouter({
+        requestContext: {
+          resourcePath: '/users/{userId}',
+          httpMethod: 'PUT',
+        },
+        pathParameters: {
+          userId: '123',
+        },
+        body: {
+          languages_spoken: ['eng', 'fr'],
+          languages_learning: ['es'],
+          id: 'abc123',
+          name: 'A new name'
+        }
+      }, lambdaContextSpy).then(() => {
+        const [err, res] = lambdaContextSpy.done.firstCall.args;
+        if (err) throw err;
+
+        const data = JSON.parse(res.body);
+        expect(res.statusCode).toBe(200);
+        expect(data.user.languages_spoken).toEqual(['eng', 'fr']);
+        expect(data.user.languages_learning).toEqual(['es']);
+        expect(data.user.name).toBe('A new name');
+      }).then(done, done);
+    });
+  });
+
+  describe('GET /language/{languageId}/questions', () => {
     it('responds with 200 and an array of questions in the specified language', done => {
       api.proxyRouter({
         requestContext: {
@@ -442,7 +543,7 @@ describe('api', () => {
     });
   });
 
-  describe('GET /users/:userId/recordings', () => {
+  describe('GET /users/{userId}/recordings', () => {
     it('responds with 404 if the userId is not found', done => {
       api.proxyRouter({
         requestContext: {
@@ -488,7 +589,7 @@ describe('api', () => {
     });
   });
 
-  describe('DELETE /users/:userId/recordings/:recordingId', () => {
+  describe('DELETE /users/{userId}/recordings/{recordingId}', () => {
     it('responds with 400 if the recording ID is not valid', done => {
       api.proxyRouter({
         requestContext: {
